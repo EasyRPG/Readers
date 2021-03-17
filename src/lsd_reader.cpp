@@ -16,6 +16,7 @@
 #include "lcf/lsd/chunks.h"
 #include "lcf/rpg/save.h"
 #include "lcf/reader_util.h"
+#include "log.h"
 #include "reader_struct.h"
 
 namespace lcf {
@@ -42,7 +43,7 @@ void LSD_Reader::PrepareSave(rpg::Save& save, int32_t version) {
 std::unique_ptr<rpg::Save> LSD_Reader::Load(const std::string& filename, const std::string& encoding) {
 	std::ifstream stream(filename.c_str(), std::ios::binary);
 	if (!stream.is_open()) {
-		fprintf(stderr, "Failed to open LSD file `%s' for reading : %s\n", filename.c_str(), strerror(errno));
+		lcf::Log::Warning("Failed to open LSD file `%s' for reading : %s\n", filename.c_str(), strerror(errno));
 		return nullptr;
 	}
 	return LSD_Reader::Load(stream, encoding);

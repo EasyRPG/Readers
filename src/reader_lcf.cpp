@@ -12,6 +12,7 @@
 #include <istream>
 
 #include "lcf/reader_lcf.h"
+#include "log.h"
 
 namespace lcf {
 // Statics
@@ -258,22 +259,10 @@ int LcfReader::Peek() {
 	return stream.peek();
 }
 
-#ifdef _DEBUG
-void LcfReader::SkipDebug(const struct LcfReader::Chunk& chunk_info, const char* srcfile) {
-	// Dump the Chunk Data in Debug Mode
-#ifdef _WIN32
-	const char* srcfilename = strrchr(srcfile, '\\');
-#else
-	const char* srcfilename = strrchr(srcfile, '/');
-#endif
-	if (srcfilename == NULL) {
-		srcfilename = srcfile;
-	} else {
-		srcfilename++;
-	}
-	fprintf(stderr, "Skipped Chunk %02X (%" PRIu32 " byte) in lcf at %" PRIX32 " (%s)\n",
-			chunk_info.ID, chunk_info.length, Tell(),
-			srcfilename);
+void LcfReader::Skip(const struct LcfReader::Chunk& chunk_info, const char* where) {
+	Log::Debug("Skipped Chunk %02X (%" PRIu32 " byte) in lcf at %" PRIX32 " (%s)\n",
+			chunk_info.ID, chunk_info.length, Tell(), where);
+
 	for (uint32_t i = 0; i < chunk_info.length; ++i) {
 		uint8_t byte;
 		LcfReader::Read(byte);
@@ -287,11 +276,6 @@ void LcfReader::SkipDebug(const struct LcfReader::Chunk& chunk_info, const char*
 	}
 	fprintf(stderr, "\n");
 }
-#else
-void LcfReader::Skip(const struct LcfReader::Chunk& chunk_info) {
-	Seek((size_t)chunk_info.length, FromCurrent);
-}
-#endif
 
 void LcfReader::SetError(const char* fmt, ...) {
 	va_list args;
